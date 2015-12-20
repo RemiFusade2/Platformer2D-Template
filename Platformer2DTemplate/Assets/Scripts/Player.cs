@@ -32,6 +32,13 @@ public class Player : MonoBehaviour {
 	bool rightButtonPushed;
 	bool upButtonPushed;
 	bool upButtonReleased;
+
+	public Animator playerAnimator;
+	public GameObject playerSprite;
+	Vector3 playerSpriteInitialScale;
+
+	public CameraShake currentCamera;
+
 	private Vector2 GetInputFromUI()
 	{
 		Vector2 input = Vector2.zero;
@@ -81,6 +88,8 @@ public class Player : MonoBehaviour {
 
 	void Start() 
 	{
+		playerSpriteInitialScale = playerSprite.transform.localScale;
+
 		controller = GetComponent<Controller2D> ();
 
 		gravity = -(2 * maxJumpHeight) / Mathf.Pow (timeToJumpApex, 2);
@@ -177,5 +186,43 @@ public class Player : MonoBehaviour {
 			velocity.y = 0;
 		}
 
+		UpdateAnimator ();
+
+		if (Input.GetKeyDown(KeyCode.H))
+		{
+			Hit ();
+		}
+	}
+
+	public void UpdateAnimator()
+	{
+		playerAnimator.SetBool ("IsOnGround", IsOnGround ());
+		playerAnimator.SetBool ("IsRunning", IsRunning ());
+		playerAnimator.SetBool ("IsOnWall", IsOnWall ());
+		bool facingRight = controller.collisions.faceDir == 1;
+		playerSprite.transform.localScale = new Vector3 (playerSpriteInitialScale.x * (facingRight ? 1 : -1), playerSpriteInitialScale.y, playerSpriteInitialScale.z); 
+	}
+
+	public bool IsOnGround()
+	{
+		return controller.collisions.below;
+	}
+	public bool IsRunning()
+	{
+		float epsilonMove = 0.01f;
+		return Mathf.Abs(velocity.x) > epsilonMove;
+	}
+	public bool IsOnWall()
+	{
+		return controller.collisions.right || controller.collisions.left;
+	}
+
+	public void Hit()
+	{
+		playerAnimator.SetTrigger ("Hit");
+		if (currentCamera != null)
+		{
+			currentCamera.TriggerShake();
+		}
 	}
 }

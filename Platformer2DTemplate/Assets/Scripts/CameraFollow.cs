@@ -49,6 +49,11 @@ public class CameraFollow : MonoBehaviour {
 		focusPosition.y = Mathf.SmoothDamp (transform.position.y, focusPosition.y, ref smoothVelocityY, verticalSmoothTime);
 		focusPosition += Vector2.right * currentLookAheadX;
 		transform.position = (Vector3)focusPosition + Vector3.forward * -10;
+
+		if (this.GetComponent<CameraShake>() != null)
+		{
+			this.GetComponent<CameraShake>().UpdateCameraPositionDuringShake();
+		}
 	}
 
 	void OnDrawGizmos() {
